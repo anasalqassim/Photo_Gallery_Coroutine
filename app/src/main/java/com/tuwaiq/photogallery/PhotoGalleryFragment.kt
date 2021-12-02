@@ -2,12 +2,11 @@ package com.tuwaiq.photogallery
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.lifecycle.Observer
+import android.widget.SearchView
+
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
@@ -20,6 +19,49 @@ class PhotoGalleryFragment : Fragment() {
 
 
     private  val viewModel: PhotoGalleryViewModel by lazy { ViewModelProvider(this)[PhotoGalleryViewModel::class.java] }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.search_menu,menu)
+
+        val searchItem = menu.findItem(R.id.search_item)
+        val searchView = searchItem.actionView as SearchView
+
+        searchView.apply {
+
+            setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    if (query != null) {
+                        viewModel.setSearchTerm(query)
+                    }
+
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    return false
+                }
+
+            })
+
+
+        }
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            R.id.clear_search -> {viewModel.setSearchTerm("")
+                true
+            }
+           else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,7 +76,7 @@ class PhotoGalleryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.photosLiveData().observe(
-            viewLifecycleOwner, Observer {
+            viewLifecycleOwner,  {
                 it?.let { galleryItems->
                     myRv.adapter = PhotosAdapter(galleryItems)
                 }
@@ -42,7 +84,7 @@ class PhotoGalleryFragment : Fragment() {
         )
     }
 
-   private inner class PhotosHolder(val view: View):
+   private inner class PhotosHolder(view: View):
        RecyclerView.ViewHolder(view){
 
            val photoItem:ImageView = itemView.findViewById(R.id.photo_item)
