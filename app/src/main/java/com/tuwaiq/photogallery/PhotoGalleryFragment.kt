@@ -1,7 +1,13 @@
 package com.tuwaiq.photogallery
 
+import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import android.widget.ImageView
@@ -9,8 +15,14 @@ import android.widget.SearchView
 
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.*
 import coil.load
 import com.tuwaiq.photogallery.flickr.models.GalleryItem
+import com.tuwaiq.photogallery.workers.PollWorker
+import java.util.concurrent.TimeUnit
+
+private const val WORKER_ID = "Worker"
+private const val TAG = "PhotoGalleryFragment"
 
 class PhotoGalleryFragment : Fragment() {
 
@@ -19,6 +31,27 @@ class PhotoGalleryFragment : Fragment() {
 
 
     private  val viewModel: PhotoGalleryViewModel by lazy { ViewModelProvider(this)[PhotoGalleryViewModel::class.java] }
+
+
+    private val onShowNotification = object : BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d(TAG , "FROM onShowNotification")
+            resultCode = Activity.RESULT_CANCELED
+        }
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        IntentFilter(PollWorker.NOTIFICATION_ACTION).also {
+            requireContext().registerReceiver(onShowNotification,it)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        requireContext().unregisterReceiver(onShowNotification)
+    }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
@@ -61,6 +94,23 @@ class PhotoGalleryFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val workRequest = PeriodicWorkRequest.Builder(
+            PollWorker::class.java,15,TimeUnit.MINUTES)
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(requireContext())
+            .enqueueUniquePeriodicWork(WORKER_ID,
+                ExistingPeriodicWorkPolicy.REPLACE,
+                workRequest
+            )
+
+
     }
 
     override fun onCreateView(

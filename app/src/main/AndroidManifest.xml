@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.tuwaiq.photogallery">
+    <permission android:name="com.tuwaiq.photogallery.PRIVATE"
+        android:protectionLevel="signature"/>
+
+    <uses-permission android:name="com.tuwaiq.photogallery.PRIVATE"/>
+
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:name=".PhotoGalleryApp"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PhotoGallery">
@@ -19,6 +25,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".broadcastsReceivers.NotificationReceiver"
+            android:permission="com.tuwaiq.photogallery.PRIVATE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.tuwaiq.photosgallery.SHOW_NOTIFICATION"/>
+            </intent-filter>
+
+        </receiver>
+
     </application>
+
+
 
 </manifest>
