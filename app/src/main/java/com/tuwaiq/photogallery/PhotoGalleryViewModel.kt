@@ -2,6 +2,7 @@ package com.tuwaiq.photogallery
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.*
 import com.tuwaiq.photogallery.flickr.models.GalleryItem
 import com.tuwaiq.photogallery.flickr.repo.FlickrRepo
@@ -43,7 +44,6 @@ class PhotoGalleryViewModel(private val context: Application) : AndroidViewModel
              }.invokeOnCompletion {
 
                  viewModelScope.launch {
-
                      tempLiveData.value = tempList
 
                  }

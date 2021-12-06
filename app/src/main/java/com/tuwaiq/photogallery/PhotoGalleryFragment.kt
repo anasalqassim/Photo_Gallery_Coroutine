@@ -19,6 +19,8 @@ import androidx.work.*
 import coil.load
 import com.tuwaiq.photogallery.flickr.models.GalleryItem
 import com.tuwaiq.photogallery.workers.PollWorker
+import com.yuyakaido.android.cardstackview.CardStackLayoutManager
+import com.yuyakaido.android.cardstackview.CardStackView
 import java.util.concurrent.TimeUnit
 
 private const val WORKER_ID = "Worker"
@@ -26,7 +28,7 @@ private const val TAG = "PhotoGalleryFragment"
 
 class PhotoGalleryFragment : Fragment() {
 
-    private lateinit var myRv:RecyclerView
+    private lateinit var myRv: CardStackView
 
 
 
@@ -119,7 +121,7 @@ class PhotoGalleryFragment : Fragment() {
     ): View? {
         val v = inflater.inflate(R.layout.photo_gallery_fragment, container, false)
         myRv = v.findViewById(R.id.myRv)
-        myRv.layoutManager = GridLayoutManager(context , 2)
+        myRv.layoutManager = CardStackLayoutManager(context)
     return v
     }
 
@@ -127,6 +129,7 @@ class PhotoGalleryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel.photosLiveData().observe(
             viewLifecycleOwner,  {
+                Log.e(TAG , " it = $it")
                 it?.let { galleryItems->
                     myRv.adapter = PhotosAdapter(galleryItems)
                 }
@@ -140,6 +143,7 @@ class PhotoGalleryFragment : Fragment() {
            val photoItem:ImageView = itemView.findViewById(R.id.photo_item)
 
        fun bind(galleryItem: GalleryItem){
+           Log.e(TAG,"fdfasdfds${galleryItem.url}")
            photoItem.load(galleryItem.url)
        }
 
